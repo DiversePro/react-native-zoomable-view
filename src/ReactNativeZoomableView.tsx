@@ -66,6 +66,7 @@ class ReactNativeZoomableView extends Component<
     panBoundaryPadding: 0,
     visualTouchFeedbackEnabled: true,
     disablePanOnInitialZoom: false,
+    overflowVisible: false,
   };
 
   private panAnim = new Animated.ValueXY({ x: 0, y: 0 });
@@ -310,7 +311,7 @@ class ReactNativeZoomableView extends Component<
    */
   private grabZoomSubjectOriginalMeasurements = () => {
     // make sure we measure after animations are complete
-    InteractionManager.runAfterInteractions(() => {
+    // InteractionManager.runAfterInteractions(() => {
       // this setTimeout is here to fix a weird issue on iOS where the measurements are all `0`
       // when navigating back (react-navigation stack) from another view
       // while closing the keyboard at the same time
@@ -333,7 +334,7 @@ class ReactNativeZoomableView extends Component<
           }
         );
       });
-    });
+    // });
   };
 
   /**
@@ -393,6 +394,8 @@ class ReactNativeZoomableView extends Component<
     this.panAnim.stopAnimation();
     this.zoomAnim.stopAnimation();
     this.gestureStarted = true;
+    this.props.onGestureStarted && this.props.onGestureStarted();
+
   };
 
   /**
@@ -453,6 +456,7 @@ class ReactNativeZoomableView extends Component<
 
     this.gestureType = null;
     this.gestureStarted = false;
+    this.props.onGestureEnded && this.props.onGestureEnded();
   };
 
   /**
@@ -600,7 +604,7 @@ class ReactNativeZoomableView extends Component<
     const gestureCenterPoint = calcGestureCenterPoint(e, gestureState);
 
     if (!gestureCenterPoint) return;
-
+    
     const zoomCenter = {
       x: gestureCenterPoint.x - this.state.originalPageX,
       y: gestureCenterPoint.y - this.state.originalPageY,
@@ -1010,7 +1014,7 @@ class ReactNativeZoomableView extends Component<
   render() {
     return (
       <View
-        style={styles.container}
+        style={[styles.container,{overflow:this.props.overflowVisible ?"visible":"hidden"}]}
         {...this.gestureHandlers.panHandlers}
         ref={this.zoomSubjectWrapperRef}
         onLayout={this.grabZoomSubjectOriginalMeasurements}
@@ -1063,7 +1067,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     position: 'relative',
-    overflow: 'hidden',
   },
 });
 
